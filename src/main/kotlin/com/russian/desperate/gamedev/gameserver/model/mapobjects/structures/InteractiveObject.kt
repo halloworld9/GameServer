@@ -1,7 +1,8 @@
 package com.russian.desperate.gamedev.gameserver.model.mapobjects.structures
 
-import com.example.demo.model.actions.Action
-import com.example.demo.model.map_objects.units.Player
+import com.russian.desperate.gamedev.gameserver.model.actions.Action
+import com.russian.desperate.gamedev.gameserver.model.mapobjects.units.Player
+
 
 interface InteractiveObject : MapObject {
 
