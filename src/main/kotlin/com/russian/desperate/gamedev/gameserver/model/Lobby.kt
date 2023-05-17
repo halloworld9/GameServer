@@ -3,9 +3,9 @@ package com.russian.desperate.gamedev.gameserver.model
 
 import com.russian.desperate.gamedev.gameserver.model.dto.User
 import com.russian.desperate.gamedev.gameserver.model.mapobjects.units.PlayerClass
-import java.io.Serializable
 
-class Lobby : Serializable {
+
+class Lobby {
     private val users = HashMap<User, PlayerClass>()
 
     fun addUser(user: User): Boolean {
@@ -16,26 +16,37 @@ class Lobby : Serializable {
         return false
     }
 
+    fun setPlayerClass(user: User, playerClass: PlayerClass): Boolean {
+        return if (users.containsKey(user)) {
+            users[user] = playerClass
+            true
+        } else
+            false
+    }
+
     fun removeUser(user: User): Boolean {
         val a = users.remove(user)
         return a != null
     }
 
-    fun getUsers(): ArrayList<String> {
+    fun getUsernames(): ArrayList<String> {
         val users = ArrayList<String>()
-        for (i in this.users.values)
+        for (i in this.users.keys)
             users.add(i.toString())
         return users
     }
 
-    fun getUsersAndClasses(): ArrayList<Pair<String, PlayerClass>> {
-        val pairs = ArrayList<Pair<String, PlayerClass>>()
+    fun getUsersAndClasses(): ArrayList<Pair<User, PlayerClass>> {
+        val pairs = ArrayList<Pair<User, PlayerClass>>()
         for (i in users.entries)
-            pairs.add(Pair(i.key.name, i.value))
+            pairs.add(Pair(i.key, i.value))
 
         return pairs
     }
 
+    fun containsUser(user: User): Boolean {
+        return users.containsKey(user)
+    }
 }
 
 private const val MAX_PLAYERS = 4
