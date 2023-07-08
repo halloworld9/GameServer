@@ -8,18 +8,6 @@ import java.util.*
 
 class Game(playerClasses: Collection<Player>) {
 
-    /**
-     * playerMoves contains matrix of move codes
-     *
-     * -2 is cell with Unit
-     *
-     * -1 is unpassable Cell
-     *
-     * 0 is current position
-     *
-     * &gt;0 is distance to Cell
-     *
-     */
     private val playerMoves = HashMap<Player, Array<Array<Int>>>()
     private val gameField: Array<Array<Cell>> = GameFieldFactory.createField(playerClasses.size)
     private val playerCoordinates: HashMap<Player, Pair<Int, Int>> = HashMap()
@@ -122,16 +110,18 @@ class Game(playerClasses: Collection<Player>) {
 
     private fun setMatrixBase(player: Player): Array<Array<Int>> {
         if (player != currentPlayer()) throw IllegalTurnOrderException(player)
-
+        val PASSABLE = 0
+        val UNPASSABLE = -1
+        val UNIT = -2
         val matrix = playerMoves[player] ?: throw NoSuchPlayerException(player)
         for (x in gameField.indices) {
             for (y in gameField[0].indices) {
                 if (!gameField[x][y].isPassable)
-                    matrix[x][y] = -1
+                    matrix[x][y] = UNPASSABLE
                 else if (gameField[x][y].hasUnit)
-                    matrix[x][y] = -2
+                    matrix[x][y] = UNIT
                 else
-                    matrix[x][y] = 0
+                    matrix[x][y] = PASSABLE
             }
         }
         return matrix
@@ -141,7 +131,7 @@ class Game(playerClasses: Collection<Player>) {
      * Updates player's moveMatrix
      * @param player, which path you want to update
      */
-    fun updatePlayersMoveMatrix(player: Player) {
+    private fun updatePlayersMoveMatrix(player: Player) {
         val moves = setMatrixBase(player)
         val coordinates = playerCoordinates[player] ?: throw NoSuchPlayerException(player)
         val UNIT = -2
