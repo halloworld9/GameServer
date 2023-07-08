@@ -92,8 +92,19 @@ class Game(playerClasses: Collection<Player>) {
 
         gameField[playerCoordinates.first][playerCoordinates.second].removeMapObject(player)
         player.energy -= playerMoves[x][y]
+        val unit = gameField[playerCoordinates.first][playerCoordinates.second].unit
         gameField[x][y].addMapObject(player)
         this.playerCoordinates[player] = Pair(x, y)
+        if (unit != null) {
+            val loser = startBattle(player, unit)
+            gameField[x][y].removeMapObject(loser)
+            if (loser is Player) {
+                playerOrder.remove(loser)
+                this.playerCoordinates.remove(loser)
+                this.playerMoves.remove(loser)
+                throw PlayerWasKilledException(player)
+            }
+        }
     }
 
     private fun startBattle(player: Player, secondUnit: Unit): Unit {
