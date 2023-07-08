@@ -1,12 +1,9 @@
 package com.russian.desperate.gamedev.gameserver.model
 
-import com.russian.desperate.gamedev.gameserver.model.actions.Action
-import com.russian.desperate.gamedev.gameserver.model.exceptions.IllegalMoveException
-import com.russian.desperate.gamedev.gameserver.model.exceptions.IllegalTurnOrderException
-import com.russian.desperate.gamedev.gameserver.model.exceptions.NoSuchInteractiveObjectException
-import com.russian.desperate.gamedev.gameserver.model.exceptions.NoSuchPlayerException
+import com.russian.desperate.gamedev.gameserver.model.exceptions.*
 import com.russian.desperate.gamedev.gameserver.model.mapobjects.structures.InteractiveObject
 import com.russian.desperate.gamedev.gameserver.model.mapobjects.units.Player
+import com.russian.desperate.gamedev.gameserver.model.mapobjects.units.Unit
 import java.util.*
 
 class Game(playerClasses: Collection<Player>) {
@@ -110,6 +107,9 @@ class Game(playerClasses: Collection<Player>) {
         this.playerCoordinates[player] = Pair(x, y)
     }
 
+    private fun startBattle(player: Player, secondUnit: Unit): Unit {
+        return Battle(player, secondUnit).startBattle()
+    }
 
     private fun checkMove(player: Player, x: Int, y: Int): Boolean {
         val playerMoves = this.playerMoves[player] ?: throw NoSuchPlayerException(player)
