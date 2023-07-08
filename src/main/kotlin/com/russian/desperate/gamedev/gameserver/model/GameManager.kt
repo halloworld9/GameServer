@@ -1,6 +1,5 @@
 package com.russian.desperate.gamedev.gameserver.model
 
-import com.russian.desperate.gamedev.gameserver.model.actions.Action
 import com.russian.desperate.gamedev.gameserver.model.dto.User
 import com.russian.desperate.gamedev.gameserver.model.exceptions.NoSuchUserException
 import com.russian.desperate.gamedev.gameserver.model.mapobjects.structures.InteractiveObject
@@ -9,8 +8,9 @@ import com.russian.desperate.gamedev.gameserver.model.mapobjects.units.PlayerCla
 import com.russian.desperate.gamedev.gameserver.model.mapobjects.units.PlayerFactory
 
 class GameManager {
-    private val lobby = Lobby()
-    private lateinit var game: Game
+    val lobby = Lobby()
+    lateinit var game: Game
+        private set
     private val userPlayerMap = HashMap<User, Player>()
 
     fun startGame() {
@@ -79,6 +79,7 @@ class GameManager {
     fun containsUser(user: User): Boolean {
         return lobby.containsUser(user)
     }
+
     override fun toString(): String {
         return "GameManager(lobby=$lobby, game=$game)"
     }
