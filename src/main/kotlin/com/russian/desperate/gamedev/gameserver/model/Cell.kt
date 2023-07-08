@@ -11,13 +11,18 @@ class Cell(vararg mapObjects: MapObject) {
     var hasUnit = false
         private set
 
+    var unit: Unit? = null
+        private set
+
     init {
         for (i in mapObjects) {
             this.mapObjects.add(i)
             if (!i.isPassable)
                 isPassable = false
-            else if (i is Unit)
+            else if (i is Unit) {
                 hasUnit = true
+                unit = i
+            }
             else if (i is InteractiveObject)
                 interactiveObjects.add(i)
         }
@@ -40,8 +45,10 @@ class Cell(vararg mapObjects: MapObject) {
             interactiveObjects.add(mapObject)
         if (isAdded && !mapObject.isPassable)
             isPassable = false
-        else if (isAdded && mapObject is Unit)
+        else if (isAdded && mapObject is Unit) {
+            unit = mapObject
             hasUnit = true
+        }
 
         return isAdded
     }
@@ -59,9 +66,11 @@ class Cell(vararg mapObjects: MapObject) {
         for (i in mapObjects)
             if (i is Unit) {
                 hasUnit = true
+                unit = i
                 return
             }
         isPassable = false
+        unit = null
     }
 
 }
