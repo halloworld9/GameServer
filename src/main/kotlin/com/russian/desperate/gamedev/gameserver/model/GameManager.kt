@@ -47,9 +47,14 @@ class GameManager {
         return game.getInteractiveObjects(player)
     }
 
-    fun activateInteractiveObject(user: User, interactiveObject: InteractiveObject): Action {
+    fun activateInteractiveObject(user: User, interactiveObject: InteractiveObject) {
         val player = userPlayerMap[user] ?: throw NoSuchUserException(user)
-        return game.activateInteractiveObject(player, interactiveObject)
+        game.activateInteractiveObject(player, interactiveObject)
+    }
+
+    fun getInteractionObjectDescription(user: User, interactiveObject: InteractiveObject): String {
+        val player = userPlayerMap[user] ?: throw NoSuchUserException(user)
+        return game.getInteractiveObjectDescription(player, interactiveObject)
     }
 
     fun getPath(user: User, x: Int, y: Int): ArrayList<Pair<Int, Int>> {
