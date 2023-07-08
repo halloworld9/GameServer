@@ -16,11 +16,5 @@ class Player (
     var level = 1
     var experience = 0
     val inventory = Array<Item>(10) { EmptyItem }
-    override val effects: List<StatusEffect>
-
-    init {
-        this.effects = ArrayList()
-    }
-
-
+    override val effects =  ArrayList<StatusEffect>()
 }
