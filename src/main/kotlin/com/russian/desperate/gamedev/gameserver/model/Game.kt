@@ -9,9 +9,10 @@ import java.util.*
 class Game(playerClasses: Collection<Player>) {
 
     private val playerMoves = HashMap<Player, Array<Array<Int>>>()
-    private val gameField: Array<Array<Cell>> = GameFieldFactory.createField(playerClasses.size)
+    val gameField: Array<Array<Cell>> = GameFieldFactory.createField(playerClasses.size)
     private val playerCoordinates: HashMap<Player, Pair<Int, Int>> = HashMap()
-    private var turn = 0
+    var turn = 0
+        private set
     private val playerOrder = ArrayList<Player>(playerClasses.size)
 
     init {
