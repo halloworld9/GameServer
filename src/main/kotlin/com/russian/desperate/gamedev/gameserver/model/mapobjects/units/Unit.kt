@@ -7,6 +7,6 @@ import com.russian.desperate.gamedev.gameserver.model.mapobjects.structures.MapO
 interface Unit : MapObject {
     val attack: Int
     val defence: Int
-    val health: Int
+    var health: Int
     val effects: List<StatusEffect>
 }
