@@ -2,6 +2,8 @@ package com.russian.desperate.gamedev.gameserver.model
 
 import com.russian.desperate.gamedev.gameserver.model.dto.User
 import com.russian.desperate.gamedev.gameserver.model.exceptions.NoSuchUserException
+import com.russian.desperate.gamedev.gameserver.model.exceptions.PlayerWasKilledException
+import com.russian.desperate.gamedev.gameserver.model.exceptions.UserLoosedException
 import com.russian.desperate.gamedev.gameserver.model.mapobjects.structures.InteractiveObject
 import com.russian.desperate.gamedev.gameserver.model.mapobjects.units.Player
 import com.russian.desperate.gamedev.gameserver.model.mapobjects.units.PlayerClass
@@ -26,7 +28,17 @@ class GameManager {
 
     fun movePlayer(user: User, x: Int, y: Int): Boolean {
         val player = userPlayerMap[user] ?: throw NoSuchUserException(user)
-        game.movePlayer(player, x, y)
+
+        try {
+            game.movePlayer(player, x, y)
+        } catch (exception: PlayerWasKilledException) {
+            for (entry in userPlayerMap.entries) {
+                if (entry.value == exception.player) {
+                    userPlayerMap.remove(entry.key)
+                    throw UserLoosedException(entry.key)
+                }
+            }
+        }
         return true
     }
 
