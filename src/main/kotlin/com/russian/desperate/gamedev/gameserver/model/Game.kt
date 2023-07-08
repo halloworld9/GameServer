@@ -58,13 +58,28 @@ class Game(playerClasses: Collection<Player>) {
         return gameField[coordinates.first][coordinates.second].interactiveObjects
     }
 
-    fun activateInteractiveObject(player: Player, interactiveObject: InteractiveObject): Action {
+    fun activateInteractiveObject(player: Player, interactiveObject: InteractiveObject) {
         if (player != currentPlayer()) throw IllegalTurnOrderException(player)
 
         val coordinates = playerCoordinates[player] ?: throw NoSuchPlayerException(player)
         if (gameField[coordinates.first][coordinates.second].interactiveObjects.contains(interactiveObject))
-            return interactiveObject.interact(player)
+            interactiveObject.interact(player)
+        else
+            throw NoSuchInteractiveObjectException(interactiveObject)
+    }
+
+    fun getInteractiveObjectDescription(player: Player, interactiveObject: InteractiveObject): String {
+        if (player != currentPlayer()) throw IllegalTurnOrderException(player)
+
+        val coordinates = playerCoordinates[player] ?: throw NoSuchPlayerException(player)
+        if (gameField[coordinates.first][coordinates.second].interactiveObjects.contains(interactiveObject))
+            return interactiveObject.getInteractDescription()
+
         throw NoSuchInteractiveObjectException(interactiveObject)
+    }
+
+    fun isPlayerPlaying(player: Player) : Boolean {
+        return playerMoves.containsKey(player)
     }
 
     /**
