@@ -8,6 +8,7 @@ import com.russian.desperate.gamedev.gameserver.model.mapobjects.structures.Inte
 import com.russian.desperate.gamedev.gameserver.model.mapobjects.units.Player
 import com.russian.desperate.gamedev.gameserver.model.mapobjects.units.PlayerClass
 import com.russian.desperate.gamedev.gameserver.model.mapobjects.units.PlayerFactory
+import com.russian.desperate.gamedev.gameserver.model.mapobjects.units.Unit
 
 class GameManager {
     val lobby = Lobby()
@@ -26,20 +27,14 @@ class GameManager {
         }
     }
 
-    fun movePlayer(user: User, x: Int, y: Int): Boolean {
+    fun movePlayer(user: User, x: Int, y: Int): List<Coordinates> {
         val player = userPlayerMap[user] ?: throw NoSuchUserException(user)
+        return game.movePlayer(player, x, y)
+    }
 
-        try {
-            game.movePlayer(player, x, y)
-        } catch (exception: PlayerWasKilledException) {
-            for (entry in userPlayerMap.entries) {
-                if (entry.value == exception.player) {
-                    userPlayerMap.remove(entry.key)
-                    throw UserLoosedException(entry.key)
-                }
-            }
-        }
-        return true
+    fun tryStartBattle(user: User): Unit? {
+        val player = userPlayerMap[user] ?: throw NoSuchUserException(user)
+        return game.tryStartBattle(player)
     }
 
     fun getInteractiveObjects(user: User): Set<InteractiveObject> {
@@ -57,9 +52,9 @@ class GameManager {
         return game.getInteractiveObjectDescription(player, interactiveObject)
     }
 
-    fun getPath(user: User, x: Int, y: Int): ArrayList<Pair<Int, Int>> {
+    fun getPath(user: User, x: Int, y: Int): List<Coordinates> {
         val player = userPlayerMap[user] ?: throw NoSuchUserException(user)
-        return game.getPlayersPath(player, x, y)
+        return game.getPath(player, x, y)
     }
 
     fun getPlayerMoves(user: User): Array<Array<Int>> {
