@@ -5,12 +5,13 @@ import com.russian.desperate.gamedev.gameserver.model.mapobjects.structures.Inte
 import com.russian.desperate.gamedev.gameserver.model.mapobjects.units.Player
 import com.russian.desperate.gamedev.gameserver.model.mapobjects.units.Unit
 import java.util.*
+import kotlin.collections.ArrayList
 
 class Game(playerClasses: Collection<Player>) {
 
     private val playerMoves = HashMap<Player, Array<Array<Int>>>()
     val gameField: Array<Array<Cell>> = GameFieldFactory.createField(playerClasses.size)
-    private val playerCoordinates: HashMap<Player, Pair<Int, Int>> = HashMap()
+    private val playerCoordinates: HashMap<Player, Coordinates> = HashMap()
     var turn = 0
         private set
     private val playerOrder = ArrayList<Player>(playerClasses.size)
@@ -21,7 +22,7 @@ class Game(playerClasses: Collection<Player>) {
             val currentPosition = startPositions[i]
             playerOrder.add(e)
             playerCoordinates[e] = currentPosition
-            gameField[currentPosition.first][currentPosition.second].addMapObject(e)
+            gameField[currentPosition.x][currentPosition.y].addMapObject(e)
         }
 
         initPlayerMoves()
@@ -41,14 +42,14 @@ class Game(playerClasses: Collection<Player>) {
         if (player != currentPlayer()) throw IllegalTurnOrderException(player)
 
         val coordinates = playerCoordinates[player] ?: throw NoSuchPlayerException(player)
-        return gameField[coordinates.first][coordinates.second].interactiveObjects
+        return gameField[coordinates.x][coordinates.y].interactiveObjects
     }
 
     fun activateInteractiveObject(player: Player, interactiveObject: InteractiveObject) {
         if (player != currentPlayer()) throw IllegalTurnOrderException(player)
 
         val coordinates = playerCoordinates[player] ?: throw NoSuchPlayerException(player)
-        if (gameField[coordinates.first][coordinates.second].interactiveObjects.contains(interactiveObject))
+        if (gameField[coordinates.x][coordinates.y].interactiveObjects.contains(interactiveObject))
             interactiveObject.interact(player)
         else
             throw NoSuchInteractiveObjectException(interactiveObject)
@@ -58,7 +59,7 @@ class Game(playerClasses: Collection<Player>) {
         if (player != currentPlayer()) throw IllegalTurnOrderException(player)
 
         val coordinates = playerCoordinates[player] ?: throw NoSuchPlayerException(player)
-        if (gameField[coordinates.first][coordinates.second].interactiveObjects.contains(interactiveObject))
+        if (gameField[coordinates.x][coordinates.y].interactiveObjects.contains(interactiveObject))
             return interactiveObject.getInteractDescription()
 
         throw NoSuchInteractiveObjectException(interactiveObject)
@@ -83,28 +84,34 @@ class Game(playerClasses: Collection<Player>) {
         return playerOrder[turn % playerOrder.size]
     }
 
-    fun movePlayer(player: Player, x: Int, y: Int) {
+    fun movePlayer(player: Player, x: Int, y: Int) : List<Coordinates> {
         if (player != currentPlayer()) throw IllegalTurnOrderException(player)
 
         val playerCoordinates = playerCoordinates[player] ?: throw NoSuchPlayerException(player)
         val playerMoves = this.playerMoves[player] ?: throw NoSuchPlayerException(player)
-        if (!checkMove(player, x, y)) throw IllegalMoveException(player, x, y)
-
-        gameField[playerCoordinates.first][playerCoordinates.second].removeMapObject(player)
+        if (!checkMove(player, x, y)) return ArrayList()
+        val path = getPath(player, x, y)
+        gameField[playerCoordinates.x][playerCoordinates.y].removeMapObject(player)
         player.energy -= playerMoves[x][y]
-        val unit = gameField[playerCoordinates.first][playerCoordinates.second].unit
         gameField[x][y].addMapObject(player)
-        this.playerCoordinates[player] = Pair(x, y)
-        if (unit != null) {
-            val loser = startBattle(player, unit)
-            gameField[x][y].removeMapObject(loser)
-            if (loser is Player) {
-                playerOrder.remove(loser)
-                this.playerCoordinates.remove(loser)
-                this.playerMoves.remove(loser)
-                throw PlayerWasKilledException(player)
-            }
-        }
+        this.playerCoordinates[player] = Coordinates(x, y)
+        return path
+    }
+
+    fun tryStartBattle(player: Player): Unit? {
+        if (player != currentPlayer()) throw IllegalTurnOrderException(player)
+        val playerCoordinates = playerCoordinates[player] ?: throw NoSuchPlayerException(player)
+        val units = gameField[playerCoordinates.x][playerCoordinates.y].units
+        if (!units.contains(player))
+            throw NoSuchPlayerException(player)
+        if (units.size == 1)
+            return null
+
+        for (i in units)
+            if (i != player)
+                return startBattle(player, i)
+
+        return null
     }
 
     private fun startBattle(player: Player, secondUnit: Unit): Unit {
@@ -122,6 +129,7 @@ class Game(playerClasses: Collection<Player>) {
 
     private fun setMatrixBase(player: Player): Array<Array<Int>> {
         if (player != currentPlayer()) throw IllegalTurnOrderException(player)
+        val playerCoordinate = playerCoordinates[player]?: throw NoSuchPlayerException(player)
         val PASSABLE = 0
         val UNPASSABLE = -1
         val UNIT = -2
@@ -136,6 +144,7 @@ class Game(playerClasses: Collection<Player>) {
                     matrix[x][y] = PASSABLE
             }
         }
+        matrix[playerCoordinate.x][playerCoordinate.y] = 0
         return matrix
     }
 
@@ -149,8 +158,8 @@ class Game(playerClasses: Collection<Player>) {
         val UNIT = -2
         val PASSABLE = 0
 
-        val x = coordinates.first
-        val y = coordinates.second
+        val x = coordinates.x
+        val y = coordinates.y
         val queue = LinkedList<Pair<Int, Int>>()
         queue.add(Pair(x, y))
         while (queue.size > 0) {
@@ -185,16 +194,17 @@ class Game(playerClasses: Collection<Player>) {
      * @param y - target y
      * @return list of coordinates
      */
-    fun getPlayersPath(player: Player, x: Int, y: Int): ArrayList<Pair<Int, Int>> {
-        val moves = ArrayList<Pair<Int, Int>>()
+    fun getPath(player: Player, x: Int, y: Int): List<Coordinates> {
+        val moves = ArrayList<Coordinates>()
         val coordinates = playerCoordinates[player] ?: throw NoSuchPlayerException(player)
         val moveMatrix = playerMoves[player] ?: throw NoSuchPlayerException(player)
-        if (moveMatrix[x][y] <= 0) return moves
-        val startX = coordinates.first
-        val startY = coordinates.second
+        if (moveMatrix[x][y] <= 0 && moveMatrix[x][y] != -2) return moves
+        val startX = coordinates.x
+        val startY = coordinates.y
         var curX = x
         var curY = y
-        while (curX != startX && curY != startY) {
+        moves.add(Coordinates(x, y))
+        while (curX != startX || curY != startY) {
             val currentValue = moveMatrix[curX][curY]
             outerLoop@ for (i in curX - 1..curX + 1) {
                 if (i < 0)
@@ -207,7 +217,8 @@ class Game(playerClasses: Collection<Player>) {
                     if (j >= moveMatrix[0].size)
                         break
                     if (currentValue - moveMatrix[i][j] == 1 && moveMatrix[i][j] != -1) {
-                        moves.add(Pair(i, j))
+                        if (moveMatrix[i][j] != 0)
+                            moves.add(Coordinates(i, j))
                         curX = i
                         curY = j
                         break@outerLoop
@@ -215,6 +226,6 @@ class Game(playerClasses: Collection<Player>) {
                 }
             }
         }
-        return moves
+        return moves.reversed()
     }
 }
