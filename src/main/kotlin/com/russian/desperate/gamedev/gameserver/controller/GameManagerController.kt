@@ -19,22 +19,16 @@ class GameManagerController {
     }
     @GetMapping("/api/game")
     fun getGame(response: ServerHttpResponse): GameDTO {
-        response.headers.add("Access-Control-Allow-Origin", "*")
-        response.headers.add("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept")
         return GameDTO(gameManager.game.gameField, gameManager.game.turn)
     }
 
     @GetMapping("/api/moves")
     fun getMoves(response: ServerHttpResponse): Array<Array<Int>> {
-        response.headers.add("Access-Control-Allow-Origin", "*")
-        response.headers.add("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept")
         return gameManager.getPlayerMoves(user)
     }
 
     @GetMapping("/api/move")
     fun getPath(response: ServerHttpResponse, x: Int, y: Int): Pair<List<Coordinates>, Unit?> {
-        response.headers.add("Access-Control-Allow-Origin", "*")
-        response.headers.add("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept")
         val path = gameManager.movePlayer(user, x, y)
         var unit: Unit? = null
         if (path.isNotEmpty())
@@ -44,8 +38,6 @@ class GameManagerController {
 
     @GetMapping("/api/pair")
     fun getPair(response: ServerHttpResponse): Pair<Int, Int> {
-        response.headers.add("Access-Control-Allow-Origin", "*")
-        response.headers.add("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept")
         return Pair(1, 2)
     }
 
