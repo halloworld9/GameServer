@@ -26,6 +26,7 @@ class Game(playerClasses: Collection<Player>) {
         }
 
         initPlayerMoves()
+        updatePlayersMoveMatrix(playerOrder[0])
     }
 
     private fun initPlayerMoves() {
