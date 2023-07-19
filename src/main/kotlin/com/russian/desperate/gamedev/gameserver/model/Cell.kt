@@ -9,9 +9,12 @@ class Cell(vararg mapObjects: MapObject) {
     var isPassable = true
         private set
     var hasUnit = false
+        get () {
+            return units.size != 0
+        }
         private set
 
-    var unit: Unit? = null
+    var units = ArrayList<Unit>()
         private set
 
     init {
@@ -21,7 +24,7 @@ class Cell(vararg mapObjects: MapObject) {
                 isPassable = false
             else if (i is Unit) {
                 hasUnit = true
-                unit = i
+                units.add(i)
             }
             else if (i is InteractiveObject)
                 interactiveObjects.add(i)
@@ -34,8 +37,6 @@ class Cell(vararg mapObjects: MapObject) {
             interactiveObjects.remove(mapObject)
         if (isRemoved && !mapObject.isPassable)
             updateIsPassable()
-        else if (isRemoved && mapObject is Unit)
-            updateHasUnit()
         return isRemoved
     }
 
@@ -46,8 +47,7 @@ class Cell(vararg mapObjects: MapObject) {
         if (isAdded && !mapObject.isPassable)
             isPassable = false
         else if (isAdded && mapObject is Unit) {
-            unit = mapObject
-            hasUnit = true
+            units.add(mapObject)
         }
 
         return isAdded
@@ -60,17 +60,6 @@ class Cell(vararg mapObjects: MapObject) {
                 return
             }
         isPassable = true
-    }
-
-    private fun updateHasUnit() {
-        for (i in mapObjects)
-            if (i is Unit) {
-                hasUnit = true
-                unit = i
-                return
-            }
-        isPassable = false
-        unit = null
     }
 
 }
