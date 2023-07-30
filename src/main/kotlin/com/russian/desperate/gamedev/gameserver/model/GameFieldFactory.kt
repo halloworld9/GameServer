@@ -8,10 +8,10 @@ class GameFieldFactory {
             return field
         }
 
-        fun getStartPosition(playerCount: Int): ArrayList<Pair<Int, Int>> {
-            val positions = ArrayList<Pair<Int, Int>>(playerCount)
+        fun getStartPosition(playerCount: Int): ArrayList<Coordinates> {
+            val positions = ArrayList<Coordinates>(playerCount)
             for (i in 0 until playerCount)
-                positions.add(Pair(0, 0))
+                positions.add(Coordinates(0, 0))
 
             return positions
         }

@@ -8,7 +8,6 @@ import java.util.*
 import kotlin.collections.ArrayList
 
 class Game(playerClasses: Collection<Player>) {
-
     private val playerMoves = HashMap<Player, Array<Array<Int>>>()
     val gameField: Array<Array<Cell>> = GameFieldFactory.createField(playerClasses.size)
     private val playerCoordinates: HashMap<Player, Coordinates> = HashMap()
